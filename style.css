@@ -1,0 +1,461 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+body {
+    background: #f0f2f5;
+    color: #1a1a1a;
+}
+
+/* Navbar */
+.navbar {
+    background: #1e293b;
+    color: white;
+    padding: 16px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.navbar h2 {
+    font-size: 20px;
+    letter-spacing: 0.5px;
+}
+
+.navbar a {
+    color: #cbd5e1;
+    text-decoration: none;
+    margin-left: 22px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.navbar a:hover {
+    color: #ffffff;
+}
+
+.navbar span {
+    color: #94a3b8;
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+/* --- Dashboard animations --- */
+
+/* Navbar slides down on load */
+.navbar {
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+
+/* Heading fades in */
+.container h3 {
+    animation: fadeIn 0.6s ease-out 0.2s both;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Item cards: fade + slide up, staggered */
+.item-card {
+    opacity: 0;
+    animation: cardIn 0.5s ease-out forwards;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Hover lift effect */
+.item-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+}
+
+/* Image zoom on hover inside card */
+.item-card img {
+    transition: transform 0.3s ease;
+    overflow: hidden;
+}
+.item-card:hover img {
+    transform: scale(1.05);
+}
+
+/* Status badge subtle pulse for "lost" items */
+.badge-lost {
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* Nav links hover underline slide */
+.navbar a {
+    position: relative;
+    text-decoration: none;
+}
+.navbar a::after {
+    content: '';
+    position: absolute;
+    left: 0; bottom: -2px;
+    width: 0; height: 2px;
+    background: currentColor;
+    transition: width 0.25s ease;
+}
+.navbar a:hover::after {
+    width: 100%;
+}
+
+/* --- Contact page --- */
+.contact-container {
+    max-width: 500px;
+    margin: 40px auto;
+    animation: fadeIn 0.6s ease-out both;
+}
+
+.contact-subtitle {
+    color: #666;
+    margin-bottom: 24px;
+}
+
+/* Floating label inputs */
+.form-group {
+    position: relative;
+    margin-bottom: 24px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 10px 8px;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    font-size: 15px;
+    outline: none;
+    background: transparent;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-bottom-color: #4a90d9;
+}
+
+.form-group label {
+    position: absolute;
+    top: 12px;
+    left: 10px;
+    color: #999;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus + label,
+.form-group input:not(:placeholder-shown) + label,
+.form-group textarea:focus + label,
+.form-group textarea:not(:placeholder-shown) + label {
+    top: -10px;
+    font-size: 12px;
+    color: #4a90d9;
+}
+
+.contact-form button {
+    background: #4a90d9;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contact-form button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(74,144,217,0.3);
+}
+
+/* Success toast slides in */
+.toast-success {
+    background: #e6f7ee;
+    color: #1a7a4c;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    animation: slideDown 0.4s ease-out;
+}
+
+.contact-info {
+    background: #f0f6ff;
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-top: 8px;
+}
+
+.contact-info a {
+    color: #4a90d9;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.contact-info a:hover {
+    text-decoration: underline;
+}
+
+/* Hero (index page) */
+.hero {
+    background: linear-gradient(135deg, #1e293b, #334155);
+    color: white;
+    padding: 50px 40px;
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.hero p {
+    color: #cbd5e1;
+    font-size: 15px;
+}
+
+/* Container */
+.container {
+    max-width: 1150px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.container h3 {
+    margin-bottom: 15px;
+    color: #1e293b;
+}
+
+/* Search/filter bar */
+.filter-bar {
+    background: white;
+    padding: 16px 20px;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 25px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.filter-bar input,
+.filter-bar select {
+    padding: 10px 12px;
+    border: 1px solid #dfe3e8;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.filter-bar input {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-bar button {
+    padding: 10px 22px;
+    background: #1e293b;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.filter-bar button:hover {
+    background: #334155;
+}
+
+/* Forms (login/register/add/edit) */
+.form-container {
+    max-width: 420px;
+    margin: 60px auto;
+    background: white;
+    padding: 36px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.form-container h2 {
+    margin-bottom: 24px;
+    text-align: center;
+    color: #1e293b;
+}
+
+.form-container label {
+    display: block;
+    margin-top: 14px;
+    margin-bottom: 5px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.form-container input,
+.form-container select,
+.form-container textarea {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #dfe3e8;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.form-container input:focus,
+.form-container select:focus,
+.form-container textarea:focus {
+    outline: none;
+    border-color: #1e293b;
+}
+
+.form-container button {
+    width: 100%;
+    margin-top: 22px;
+    padding: 13px;
+    background: #1e293b;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.form-container button:hover {
+    background: #334155;
+}
+
+.form-container p {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.form-container p a {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.error {
+    color: #b91c1c;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-size: 13px;
+}
+
+.success {
+    color: #15803d;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-size: 13px;
+}
+
+/* Item cards */
+.items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 22px;
+}
+
+.item-card {
+    background: white;
+    padding: 18px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.item-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+}
+
+.item-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.item-card h4 {
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: #1e293b;
+}
+
+.item-card p {
+    font-size: 13px;
+    margin-bottom: 5px;
+    color: #475569;
+}
+
+.item-card p strong {
+    color: #1e293b;
+}
+
+/* Status badges */
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-lost {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.badge-found {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.badge-claimed {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.item-card a {
+    display: inline-block;
+    margin-top: 10px;
+    margin-right: 14px;
+    font-size: 13px;
+    color: #1e293b;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.item-card a:hover {
+    text-decoration: underline;
+}

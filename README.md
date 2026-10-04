@@ -49,4 +49,4 @@ A web application for Southeast University students to report lost items, post f
 
 ## Author
 
-Yasir Arafat, Southeast University, Barishal
+Yasir Arafat, Southeast University, Dhaka

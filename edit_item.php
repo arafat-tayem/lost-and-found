@@ -7,11 +7,11 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$id = $_GET['id'] ?? null;
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $error = "";
 
-// Fetch the item, but only if it belongs to this user
-$stmt = $pdo->prepare("SELECT * FROM items WHERE id = ? AND user_id = ?");
+// Fetch the item (without the heavy photo bytes), only if it belongs to this user
+$stmt = $pdo->prepare("SELECT id, title, description, category, status, location, item_date, (image_data IS NOT NULL) AS has_image FROM items WHERE id = ? AND user_id = ?");
 $stmt->execute([$id, $_SESSION['user_id']]);
 $item = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -26,29 +26,58 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $category = trim($_POST['category']);
     $status = $_POST['status'];
     $location = trim($_POST['location']);
-    $item_date = $_POST['item_date'];
+    $item_date = !empty($_POST['item_date']) ? $_POST['item_date'] : null;
 
-    $image_path = $item['image_path']; // keep old image by default
+    $image_stream = null;
+    $image_mime = null;
 
-    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
-        $filename = $_FILES['image']['name'];
-        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    if (isset($_FILES['image']) && $_FILES['image']['error'] != UPLOAD_ERR_NO_FILE) {
+        if ($_FILES['image']['error'] != UPLOAD_ERR_OK) {
+            $error = "Image upload failed. Please try a smaller file (max 2 MB).";
+        } elseif ($_FILES['image']['size'] > 2 * 1024 * 1024) {
+            $error = "Image is too large. Maximum size is 2 MB.";
+        } else {
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $mime = $finfo->file($_FILES['image']['tmp_name']);
+            $allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
-        if (in_array($ext, $allowed)) {
-            $new_filename = uniqid() . '.' . $ext;
-            $destination = 'uploads/' . $new_filename;
-            if (move_uploaded_file($_FILES['image']['tmp_name'], $destination)) {
-                $image_path = $destination;
+            if (in_array($mime, $allowed, true)) {
+                $image_stream = fopen($_FILES['image']['tmp_name'], 'rb');
+                $image_mime = $mime;
+            } else {
+                $error = "Invalid image type. Only JPG, PNG, GIF, WEBP allowed.";
             }
         }
     }
 
-    $stmt = $pdo->prepare("UPDATE items SET title=?, description=?, category=?, status=?, location=?, item_date=?, image_path=? WHERE id=? AND user_id=?");
-    $stmt->execute([$title, $description, $category, $status, $location, $item_date, $image_path, $id, $_SESSION['user_id']]);
+    if (empty($title) || empty($category) || empty($status)) {
+        $error = "Please fill in all required fields.";
+    }
 
-    header("Location: dashboard.php");
-    exit();
+    if (empty($error)) {
+        if ($image_stream !== null) {
+            // New photo uploaded: replace the old one
+            $stmt = $pdo->prepare("UPDATE items SET title=?, description=?, category=?, status=?, location=?, item_date=?, image_data=?, image_mime=? WHERE id=? AND user_id=?");
+            $stmt->bindValue(1, $title);
+            $stmt->bindValue(2, $description);
+            $stmt->bindValue(3, $category);
+            $stmt->bindValue(4, $status);
+            $stmt->bindValue(5, $location);
+            $stmt->bindValue(6, $item_date);
+            $stmt->bindValue(7, $image_stream, PDO::PARAM_LOB);
+            $stmt->bindValue(8, $image_mime);
+            $stmt->bindValue(9, $id, PDO::PARAM_INT);
+            $stmt->bindValue(10, $_SESSION['user_id'], PDO::PARAM_INT);
+            $stmt->execute();
+        } else {
+            // No new photo: leave image_data and image_mime untouched
+            $stmt = $pdo->prepare("UPDATE items SET title=?, description=?, category=?, status=?, location=?, item_date=? WHERE id=? AND user_id=?");
+            $stmt->execute([$title, $description, $category, $status, $location, $item_date, $id, $_SESSION['user_id']]);
+        }
+
+        header("Location: dashboard.php");
+        exit();
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -67,7 +96,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 
     <div class="form-container">
-        <h2>Edit Item</h2>
+        <?php if ($error): ?>
+            <p class="error"><?= htmlspecialchars($error) ?></p>
+        <?php endif; ?>
         <form method="POST" action="edit_item.php?id=<?= $item['id'] ?>" enctype="multipart/form-data">
             <label>Title</label>
             <input type="text" name="title" value="<?= htmlspecialchars($item['title']) ?>" required>
@@ -96,8 +127,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <input type="date" name="item_date" value="<?= $item['item_date'] ?>">
 
             <label>Current Photo</label>
-            <?php if ($item['image_path']): ?>
-                <img src="<?= htmlspecialchars($item['image_path']) ?>" style="width:100px; display:block; margin-bottom:10px;">
+            <?php if ($item['has_image']): ?>
+                <img src="image.php?id=<?= (int)$item['id'] ?>" style="width:100px; display:block; margin-bottom:10px;">
+            <?php else: ?>
+                <p>No photo yet.</p>
             <?php endif; ?>
 
             <label>Replace Photo (optional)</label>

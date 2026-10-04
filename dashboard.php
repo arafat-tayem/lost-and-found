@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Fetch this user's items
-$stmt = $pdo->prepare("SELECT * FROM items WHERE user_id = ? ORDER BY created_at DESC");
+$stmt = $pdo->prepare("SELECT id, title, description, category, status, location, item_date, created_at, (image_data IS NOT NULL) AS has_image FROM items WHERE user_id = ? ORDER BY created_at DESC");
 $stmt->execute([$_SESSION['user_id']]);
 $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -39,8 +39,10 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="items-grid">
                 <?php foreach ($items as $index => $item): ?>
                     <div class="item-card" style="animation-delay: <?= $index * 0.1 ?>s">
-                        <?php if ($item['image_path']): ?>
-                            <img src="<?= htmlspecialchars($item['image_path']) ?>" alt="Item image">
+                                                <?php if ($item['has_image']): ?>
+                            <img src="image.php?id=<?= (int)$item['id'] ?>" alt="Item image">
+                        <?php else: ?>
+                            <p style="color:#888;">No image</p>
                         <?php endif; ?>
                         <h4><?= htmlspecialchars($item['title']) ?></h4>
                         <p><?= htmlspecialchars($item['description']) ?></p>

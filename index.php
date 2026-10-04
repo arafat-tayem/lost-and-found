@@ -7,7 +7,7 @@ $search = $_GET['search'] ?? '';
 $category_filter = $_GET['category'] ?? '';
 $status_filter = $_GET['status'] ?? '';
 
-$query = "SELECT items.*, users.name AS poster_name, users.email AS poster_email FROM items JOIN users ON items.user_id = users.id WHERE 1=1";
+$query = "SELECT items.id, items.title, items.description, items.category, items.status, items.location, items.item_date, items.created_at, (items.image_data IS NOT NULL) AS has_image, users.name AS poster_name, users.email AS poster_email FROM items JOIN users ON items.user_id = users.id WHERE 1=1";
 $params = [];
 
 if (!empty($search)) {
@@ -89,8 +89,10 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="items-grid">
                 <?php foreach ($items as $item): ?>
                     <div class="item-card">
-                        <?php if ($item['image_path']): ?>
-                            <img src="<?= htmlspecialchars($item['image_path']) ?>" alt="Item image">
+                                                <?php if ($item['has_image']): ?>
+                            <img src="image.php?id=<?= (int)$item['id'] ?>" alt="Item image">
+                        <?php else: ?>
+                            <p style="color:#888;">No image</p>
                         <?php endif; ?>
                         <h4><?= htmlspecialchars($item['title']) ?></h4>
                         <p><?= htmlspecialchars($item['description']) ?></p>

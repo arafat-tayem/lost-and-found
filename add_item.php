@@ -15,34 +15,49 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $category = trim($_POST['category']);
     $status = $_POST['status'];
     $location = trim($_POST['location']);
-    $item_date = $_POST['item_date'];
+    $item_date = !empty($_POST['item_date']) ? $_POST['item_date'] : null;
 
     if (empty($title) || empty($category) || empty($status)) {
         $error = "Please fill in all required fields.";
     } else {
-        $image_path = null;
+        $image_stream = null;
+        $image_mime = null;
 
-        // Handle image upload if provided
-        if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-            $allowed = ['jpg', 'jpeg', 'png', 'gif'];
-            $filename = $_FILES['image']['name'];
-            $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-
-            if (in_array($ext, $allowed)) {
-                $new_filename = uniqid() . '.' . $ext;
-                $destination = 'uploads/' . $new_filename;
-
-                if (move_uploaded_file($_FILES['image']['tmp_name'], $destination)) {
-                    $image_path = $destination;
-                }
+        if (isset($_FILES['image']) && $_FILES['image']['error'] != UPLOAD_ERR_NO_FILE) {
+            if ($_FILES['image']['error'] != UPLOAD_ERR_OK) {
+                $error = "Image upload failed. Please try a smaller file (max 2 MB).";
+            } elseif ($_FILES['image']['size'] > 2 * 1024 * 1024) {
+                $error = "Image is too large. Maximum size is 2 MB.";
             } else {
-                $error = "Invalid image type. Only JPG, JPEG, PNG, GIF allowed.";
+                $finfo = new finfo(FILEINFO_MIME_TYPE);
+                $mime = $finfo->file($_FILES['image']['tmp_name']);
+                $allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+                if (in_array($mime, $allowed, true)) {
+                    $image_stream = fopen($_FILES['image']['tmp_name'], 'rb');
+                    $image_mime = $mime;
+                } else {
+                    $error = "Invalid image type. Only JPG, PNG, GIF, WEBP allowed.";
+                }
             }
         }
 
         if (empty($error)) {
-            $stmt = $pdo->prepare("INSERT INTO items (user_id, title, description, category, status, location, item_date, image_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$_SESSION['user_id'], $title, $description, $category, $status, $location, $item_date, $image_path]);
+            $stmt = $pdo->prepare("INSERT INTO items (user_id, title, description, category, status, location, item_date, image_data, image_mime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bindValue(1, $_SESSION['user_id']);
+            $stmt->bindValue(2, $title);
+            $stmt->bindValue(3, $description);
+            $stmt->bindValue(4, $category);
+            $stmt->bindValue(5, $status);
+            $stmt->bindValue(6, $location);
+            $stmt->bindValue(7, $item_date);
+            if ($image_stream !== null) {
+                $stmt->bindValue(8, $image_stream, PDO::PARAM_LOB);
+            } else {
+                $stmt->bindValue(8, null, PDO::PARAM_NULL);
+            }
+            $stmt->bindValue(9, $image_mime);
+            $stmt->execute();
 
             header("Location: dashboard.php");
             exit();

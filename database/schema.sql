@@ -17,5 +17,7 @@ CREATE TABLE items (
     location VARCHAR(150),
     item_date DATE,
     image_path VARCHAR(255),
+    image_data BYTEA,
+    image_mime VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
